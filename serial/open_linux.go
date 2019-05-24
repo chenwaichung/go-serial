@@ -150,10 +150,10 @@ func openInternal(options OpenOptions) (io.ReadWriteCloser, error) {
 	}
 
 	// Clear the non-blocking flag set above.
-	nonblockErr := syscall.SetNonblock(int(file.Fd()), false)
-	if nonblockErr != nil {
-		return nil, nonblockErr
-	}
+	//nonblockErr := syscall.SetNonblock(int(file.Fd()), false)
+	//if nonblockErr != nil {
+	//	return nil, nonblockErr
+	//}
 
 	t2, optErr := makeTermios2(options)
 	if optErr != nil {
@@ -203,6 +203,12 @@ func openInternal(options OpenOptions) (io.ReadWriteCloser, error) {
 		if r != 0 {
 			return nil, errors.New("Unknown error from SYS_IOCTL (RS485)")
 		}
+	}
+
+	// fix Read cannot be interrupted by Close 
+	nonblockErr := syscall.SetNonblock(int(file.Fd()), true)
+	if nonblockErr != nil {
+		return nil, nonblockErr
 	}
 
 	return file, nil
